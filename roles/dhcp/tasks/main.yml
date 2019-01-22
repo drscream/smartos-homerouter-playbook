@@ -1,0 +1,22 @@
+---
+
+- name: Upgrade all packages
+  pkgin:
+    full_upgrade: yes
+    update_cache: yes
+
+- name: Install required packages
+  pkgin:
+    name: "{{ packages }}"
+    state: present
+
+- name: Copy configuration file(s)
+  template:
+    src: dhcpd.conf.j2
+    dest: "{{ prefix }}/etc/dhcp/dhcpd.conf"
+
+- name: Enable service
+  service:
+    name: svc:/pkgsrc/isc-dhcpd:default
+    state: started
+    enabled: yes

@@ -1,0 +1,44 @@
+# dhcpd.conf
+#
+# {{ ansible_managed }}
+
+# DHCP server should send DHCPNAK messages to misconfigured clients.
+authoritative;
+
+# Time should be the length in seconds that will be assigned to a lease if the
+# client requesting the lease does not ask for a specific expiration time.
+default-lease-time 3600;
+
+# Time should be the maximum length in seconds that will be assigned to a lease.
+max-lease-time 4000;
+
+# If the use-host-decl-names parameter is true in a given scope, then for every
+# host declaration within that scope, the name provided for the host declaration
+# will be supplied to the client as its hostname.
+use-host-decl-names on;
+
+# The server-name statement can be used to inform the client of the name of the
+# server from which it is booting. Name should be the name that will be provided
+# to the client.
+option server-name dhcp.{{ domain }};
+
+# Defines the default domain of your network.
+option domain-name {{ domain }};
+
+# The domain-search option specifies a search list of Domain Names to be used by
+# the client to locate not-fully-qualified domain names.
+option domain-search {{ domain }};
+
+# Specify up to three values for the DNS servers used to resolve IP addresses
+# into hostnames and vice versa.
+option domain-name-servers {{ resolvers|join(', ') }};
+
+subnet {{ subnet }} netmask {{ netmask }} {
+  # The routers option specifies a list of IP addresses for routers on the
+  # client’s subnet. Routers should be listed in order of preference.
+  option routers {{ router }};
+  # The subnet mask option specifies the client’s subnet mask as per RFC 950.
+  option subnet-mask {{ netmask }};
+  # Dynamic range for not defined hosts.
+  range {{ zones.dhcp.dhcpd.range.start }} {{ zones.dhcp.dhcpd.range.end }};
+}
