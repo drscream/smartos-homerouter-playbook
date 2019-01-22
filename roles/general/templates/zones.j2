@@ -1,0 +1,15 @@
+---
+
+zones:
+  hosts:
+{% for uuid, zone in smartos_vms.items() %}
+    {{ zone.alias }}:
+{% if zone.nics[0]['ip'] == "dhcp" %}
+      ansible_host: {{ zone.hostname }}
+{% else %}
+      ansible_host: {{ zone.nics[0]['ip'] }}
+{% endif %}
+      ansible_become: no
+      ansible_user: root
+      ansible_python_interpreter: /opt/local/bin/python
+{% endfor %}

@@ -1,0 +1,12 @@
+---
+
+- name: Add SkyLime images server
+  imgadm:
+    source: 'https://imgapi.smartos.skylime.net'
+    type: imgapi
+    state: present
+
+- name: Install latest core-base image
+  imgadm:
+    uuid: "{{ image_uuid }}"
+    state: imported

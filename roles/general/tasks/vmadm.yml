@@ -1,0 +1,51 @@
+---
+
+- name: Create zones
+  vmadm:
+    brand: joyent
+    state: present
+    hostname: "{{ item.key }}.{{ domain }}"
+    alias: "{{ item.key }}"
+    image_uuid: "{{ image_uuid }}"
+    resolvers: "{{ resolvers }}"
+    nics:
+      - nic_tag: admin
+        ips: "{{ item.value.ips }}"
+        gateway: "{{ router }}"
+        primary: true
+    customer_metadata:
+      root_authorized_keys: "{{ lookup('file', '~/.ssh/authorized_keys') }}"
+  register: vmadm
+  loop: "{{ zones|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Collect running zone facts
+  smartos_vm_facts:
+
+- name: Add additional facts for each zone
+  set_fact:
+    homerouter:
+      "{{ smartos_vms[item.uuid].alias }}":
+        - uuid: "{{ item.uuid }}"
+        - alias: "{{ smartos_vms[item.uuid].alias }}"
+        - hostname: "{{ smartos_vms[item.uuid].hostname }}"
+        - zfs_filesystem: "{{ smartos_vms[item.uuid].zfs_filesystem }}"
+        - ip: "{{ smartos_vms[item.uuid].nics[0].ip }}"
+    cacheable: yes
+  loop: "{{ vmadm.results }}"
+  loop_control:
+    label: "{{ item._ansible_item_label }}"
+
+- name: Create local inventory file for all zones
+  template:
+    src: zones.j2
+    dest: inventory/zones.yml
+  delegate_to: localhost
+
+- name: Add fingerprints for all new zones
+  shell: ssh-keyscan -H {{ smartos_vms[item.uuid].nics[0].ip }} >> ~/.ssh/known_hosts
+  loop: "{{ vmadm.results }}"
+  delegate_to: localhost
+  loop_control:
+    label: "{{ item._ansible_item_label }}"

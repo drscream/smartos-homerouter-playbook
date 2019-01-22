@@ -1,0 +1,3 @@
+---
+#- import_tasks: imgadm.yml
+- import_tasks: vmadm.yml
