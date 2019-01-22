@@ -1,0 +1,4 @@
+---
+prefix: /opt/local
+packages:
+  - unbound

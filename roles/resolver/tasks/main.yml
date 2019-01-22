@@ -1,0 +1,28 @@
+---
+
+- name: Overwrite existing resolv.conf as workaround before new resolver is installed
+  blockinfile:
+    path: /etc/resolv.conf
+    block: |
+      nameserver 1.1.1.1
+      nameserver 8.8.8.8
+    backup: yes
+
+- name: Install required packages
+  package:
+    name: "{{ packages }}"
+    state: present
+
+- name: Copy configuration file(s)
+  copy:
+    src: unbound.conf
+    dest: "{{ prefix }}/etc/unbound/unbound.conf"
+
+- name: Setup unbound control channel
+  command: unbound-control-setup
+
+- name: Enable service
+  service:
+    name: svc:/pkgsrc/unbound:default
+    state: started
+    enabled: yes
