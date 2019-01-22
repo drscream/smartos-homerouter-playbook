@@ -1,0 +1,11 @@
+- hosts: resolver
+  environment:
+    PATH: '/usr/local/sbin:/usr/local/bin:/opt/local/sbin:/opt/local/bin:/usr/sbin:/usr/bin:/sbin'
+  roles:
+    - { role: 'resolver', tags: ['resolver', 'dns'] }
+
+- hosts: dhcp
+  environment:
+    PATH: '/usr/local/sbin:/usr/local/bin:/opt/local/sbin:/opt/local/bin:/usr/sbin:/usr/bin:/sbin'
+  roles:
+    - { role: 'dhcp', tags: ['dhcp', 'dhcpd'] }
