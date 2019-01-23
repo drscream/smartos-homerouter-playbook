@@ -20,14 +20,14 @@ use-host-decl-names on;
 # The server-name statement can be used to inform the client of the name of the
 # server from which it is booting. Name should be the name that will be provided
 # to the client.
-option server-name dhcp.{{ domain }};
+server-name "dhcp.{{ domain }}";
 
 # Defines the default domain of your network.
-option domain-name {{ domain }};
+option domain-name "{{ domain }}";
 
 # The domain-search option specifies a search list of Domain Names to be used by
 # the client to locate not-fully-qualified domain names.
-option domain-search {{ domain }};
+option domain-search "{{ domain }}";
 
 # Specify up to three values for the DNS servers used to resolve IP addresses
 # into hostnames and vice versa.
@@ -42,3 +42,10 @@ subnet {{ subnet }} netmask {{ netmask }} {
   # Dynamic range for not defined hosts.
   range {{ zones.dhcp.dhcpd.range.start }} {{ zones.dhcp.dhcpd.range.end }};
 }
+
+{% for key, value in zones.dhcp.dhcpd.hosts.items() %}
+host {{ key }} {
+  fixed-address {{ value['fixed-address'] }};
+  hardware ethernet {{ value['hardware-ethernet'] }};
+}
+{% endfor %}
