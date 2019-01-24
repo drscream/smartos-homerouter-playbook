@@ -1,0 +1,19 @@
+---
+
+- name: Set cidr network address
+  set_fact:
+    network: "{{ subnet }}/{{ netmask }}"
+
+- name: Copy ipnat configuration file
+  template:
+    src: ipnat.conf.j2
+    dest: "/etc/ipf/ipnat.conf"
+
+- name: Enable service
+  service:
+    name: svc:/network/ipfilter:default
+    state: started
+    enabled: yes
+
+- name: Enable ipv4 forwarding
+  command: routeadm -ue ipv4-forwarding
