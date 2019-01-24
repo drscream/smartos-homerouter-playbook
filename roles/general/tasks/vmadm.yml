@@ -1,4 +1,20 @@
 ---
+- name: Create uplink zone
+  vmadm:
+    brand: joyent
+    state: present
+    hostname: "uplink.{{ domain }}"
+    alias: "uplink"
+    image_uuid: "{{ image_uuid }}"
+    resolvers: "{{ resolvers }}"
+    nics:
+      - nic_tag: admin
+        ips: "{{ zones.uplink.ips }}"
+        gateway: "{{ router }}"
+        primary: true
+    customer_metadata:
+      root_authorized_keys: "{{ lookup('file', '~/.ssh/authorized_keys') }}"
+  register: vmadm_uplink
 
 - name: Create zones
   vmadm:
@@ -19,6 +35,7 @@
   loop: "{{ zones|dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+  when: item.key != 'uplink'
 
 - name: Collect running zone facts
   smartos_vm_facts:
@@ -33,9 +50,11 @@
         - zfs_filesystem: "{{ smartos_vms[item.uuid].zfs_filesystem }}"
         - ip: "{{ smartos_vms[item.uuid].nics[0].ip }}"
     cacheable: yes
-  loop: "{{ vmadm.results }}"
-  loop_control:
-    label: "{{ item._ansible_item_label }}"
+  loop: 
+    - "{{ vmadm_uplink }}"
+    - "{{ vmadm.results }}"
+  when: item.uuid is defined
+  register: homerouter
 
 - name: Create local inventory file for all zones
   template:
@@ -45,7 +64,8 @@
 
 - name: Add fingerprints for all new zones
   shell: ssh-keyscan -H {{ smartos_vms[item.uuid].nics[0].ip }} >> ~/.ssh/known_hosts
-  loop: "{{ vmadm.results }}"
+  loop:
+    - "{{ vmadm_uplink }}"
+    - "{{ vmadm.results }}"
   delegate_to: localhost
-  loop_control:
-    label: "{{ item._ansible_item_label }}"
+  when: item.uuid is defined
