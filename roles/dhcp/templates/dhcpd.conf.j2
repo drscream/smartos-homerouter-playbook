@@ -40,10 +40,10 @@ subnet {{ subnet }} netmask {{ netmask }} {
   # The subnet mask option specifies the client’s subnet mask as per RFC 950.
   option subnet-mask {{ netmask }};
   # Dynamic range for not defined hosts.
-  range {{ zones.dhcp.dhcpd.range.start }} {{ zones.dhcp.dhcpd.range.end }};
+  range {{ dhcpd.range.start }} {{ dhcpd.range.end }};
 }
 
-{% for key, value in zones.dhcp.dhcpd.hosts.items() %}
+{% for key, value in dhcpd.hosts.items() %}
 host {{ key }} {
   fixed-address {{ value['fixed-address'] }};
   hardware ethernet {{ value['hardware-ethernet'] }};
