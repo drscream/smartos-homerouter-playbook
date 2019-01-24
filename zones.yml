@@ -1,3 +1,9 @@
+- hosts: uplink
+  environment:
+    PATH: '/usr/local/sbin:/usr/local/bin:/opt/local/sbin:/opt/local/bin:/usr/sbin:/usr/bin:/sbin'
+  roles:
+    - { role: 'uplink', tags: ['uplink', 'router', 'gateway'] }
+
 - hosts: resolver
   environment:
     PATH: '/usr/local/sbin:/usr/local/bin:/opt/local/sbin:/opt/local/bin:/usr/sbin:/usr/bin:/sbin'
